@@ -5,8 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.maybhojan_backend.dto.CartItemDTO;
 import com.example.maybhojan_backend.model.Cart;
 import com.example.maybhojan_backend.repository.CartRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class CartService {
@@ -26,4 +29,11 @@ public class CartService {
         cartRepository.deleteById(id);
     }
 
+    @Transactional
+    public void clearCart(Long userId){
+        cartRepository.deleteByUserId(userId);
+    }
+    public List<CartItemDTO> getCartItems(Long userId){
+        return cartRepository.getCartItems(userId);
+    }
 }

@@ -1,11 +1,9 @@
 package com.example.maybhojan_backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name="order_items")
 public class OrderItem {
 
     @Id
@@ -20,44 +18,45 @@ public class OrderItem {
 
     private Double price;
 
-	public Long getId() {
-		return id;
-	}
+    // getters setters
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Long getOrderId() {
-		return orderId;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setOrderId(Long orderId) {
-		this.orderId = orderId;
-	}
+    public Long getOrderId() {
+        return orderId;
+    }
 
-	public Long getFoodId() {
-		return foodId;
-	}
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
 
-	public void setFoodId(Long foodId) {
-		this.foodId = foodId;
-	}
+    public Long getFoodId() {
+        return foodId;
+    }
 
-	public int getQty() {
-		return qty;
-	}
+    public void setFoodId(Long foodId) {
+        this.foodId = foodId;
+    }
 
-	public void setQty(int qty) {
-		this.qty = qty;
-	}
+    public int getQty() {
+        return qty;
+    }
 
-	public Double getPrice() {
-		return price;
-	}
+    public void setQty(int qty) {
+        this.qty = qty;
+    }
 
-	public void setPrice(Double price) {
-		this.price = price;
-	}
+    public Double getPrice() {
+        return price;
+    }
 
+    public void setPrice(Double price) {
+        this.price = price;
+    }
 }
