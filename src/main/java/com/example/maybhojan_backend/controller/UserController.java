@@ -8,6 +8,9 @@ import org.springframework.http.MediaType;
 import com.example.maybhojan_backend.model.User;
 import com.example.maybhojan_backend.service.UserService;
 import com.example.maybhojan_backend.dto.IdentityRequest;
+import com.example.maybhojan_backend.repository.UserRepository;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -17,8 +20,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     // ------------------------------
-    // Register homemaker
+    // REGISTER HOMEMAKER
     // ------------------------------
     @PostMapping("/homemaker/register")
     public User registerHomemaker(@RequestBody User user) {
@@ -26,7 +32,7 @@ public class UserController {
     }
 
     // ------------------------------
-    // Login
+    // LOGIN
     // ------------------------------
     @PostMapping("/users/login")
     public User login(@RequestBody User user) {
@@ -34,7 +40,24 @@ public class UserController {
     }
 
     // ------------------------------
-    // Identity step
+    // GET USER BY ID
+    // ------------------------------
+    @GetMapping("/users/{id}")
+    public User getUser(@PathVariable Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    // ------------------------------
+    // GET ALL USERS
+    // ------------------------------
+    @GetMapping("/users")
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    // ------------------------------
+    // STEP 1 - IDENTITY
     // ------------------------------
     @PostMapping("/homemaker/identity")
     public String saveIdentity(@RequestBody IdentityRequest request) {
@@ -45,7 +68,7 @@ public class UserController {
     }
 
     // ------------------------------
-    // Documents step (Cloudinary Upload)
+    // STEP 2 - DOCUMENT UPLOAD
     // ------------------------------
     @PostMapping(
         value = "/homemaker/documents",
@@ -63,13 +86,14 @@ public class UserController {
     }
 
     // ------------------------------
-    // Bank Step
+    // STEP 3 - BANK DETAILS
     // ------------------------------
     @PostMapping("/homemaker/bank")
-    public String saveBankDetails(@RequestParam Long userId,
-                                  @RequestParam String accountHolderName,
-                                  @RequestParam String accountNumber,
-                                  @RequestParam String ifscCode) {
+    public String saveBankDetails(
+            @RequestParam Long userId,
+            @RequestParam String accountHolderName,
+            @RequestParam String accountNumber,
+            @RequestParam String ifscCode) {
 
         userService.saveBankDetails(
                 userId,
@@ -82,7 +106,7 @@ public class UserController {
     }
 
     // ------------------------------
-    // Submit to Admin
+    // FINAL SUBMIT
     // ------------------------------
     @PostMapping("/homemaker/submit")
     public String submitForReview(@RequestParam Long userId) {

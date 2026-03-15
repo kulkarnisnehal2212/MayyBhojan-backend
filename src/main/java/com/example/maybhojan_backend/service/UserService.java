@@ -39,9 +39,23 @@ public class UserService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+
     // ------------------------------
     // Homemaker Registration
     // ------------------------------
+
+    // --------------------------------------------------
+    // GENERIC USER SAVE (CUSTOMER / DELIVERY / ADMIN)
+    // --------------------------------------------------
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+
+    // --------------------------------------------------
+    // HOMEMAKER REGISTRATION (SPECIAL FLOW)
+    // --------------------------------------------------
+
     public User registerHomemaker(User user) {
 
         user.setRole("HOMEMAKER");
@@ -63,9 +77,15 @@ public class UserService {
         return savedUser;
     }
 
+
     // ------------------------------
     // Login
     // ------------------------------
+
+    // --------------------------------------------------
+    // LOGIN
+    // --------------------------------------------------
+
     public User loginUser(String email, String password) {
 
         User user = userRepository.findByEmail(email)
@@ -82,9 +102,16 @@ public class UserService {
         return user;
     }
 
+
     // ------------------------------
     // Identity Step
     // ------------------------------
+
+
+    // --------------------------------------------------
+    // STEP 1 - IDENTITY
+    // --------------------------------------------------
+
     public void saveIdentity(IdentityRequest request) {
 
         User user = userRepository.findById(request.getUserId())
@@ -113,6 +140,11 @@ public class UserService {
     // ------------------------------
     // Upload Documents (Cloudinary)
     // ------------------------------
+
+
+    // --------------------------------------------------
+    // STEP 2 - DOCUMENT UPLOAD
+    // --------------------------------------------------
     public void uploadDocuments(Long userId,
                                 MultipartFile govtId,
                                 MultipartFile fssai,
@@ -145,9 +177,14 @@ public class UserService {
         homemakerProfileRepository.save(profile);
     }
 
+
     // ------------------------------
     // Bank Details Step
     // ------------------------------
+
+    // --------------------------------------------------
+    // STEP 3 - BANK DETAILS
+    // --------------------------------------------------
     public void saveBankDetails(Long userId,
                                 String accountHolderName,
                                 String accountNumber,
@@ -174,10 +211,15 @@ public class UserService {
 
         homemakerProfileRepository.save(profile);
     }
-
     // ------------------------------
     // Submit Application to Admin
     // ------------------------------
+
+
+    // --------------------------------------------------
+    // FINAL SUBMISSION TO ADMIN
+    // --------------------------------------------------
+
     public void submitForReview(Long userId) {
 
         User user = userRepository.findById(userId)
@@ -187,9 +229,14 @@ public class UserService {
                 .findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
 
+
         if (!profile.getIdentityVerified() ||
             !profile.getDocumentsUploaded() ||
             !profile.getBankAdded()) {
+
+        if (!profile.getIdentityVerified()
+                || !profile.getDocumentsUploaded()
+                || !profile.getBankAdded()) {
 
             throw new RuntimeException("Please complete all steps before submitting");
         }
@@ -198,4 +245,5 @@ public class UserService {
 
         userRepository.save(user);
     }
+  }
 }
