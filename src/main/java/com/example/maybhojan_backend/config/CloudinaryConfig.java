@@ -1,0 +1,20 @@
+package com.example.maybhojan_backend.config;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class CloudinaryConfig {
+
+    @Bean
+    public Cloudinary cloudinary() {
+
+        return new Cloudinary(ObjectUtils.asMap(
+                "cloud_name", "dggmooi4e",
+                "api_key", "747577923271999",
+                "api_secret", "ad3lr_vEkDNF9oXZtzOq0sQs8Mg"
+        ));
+    }
+}
