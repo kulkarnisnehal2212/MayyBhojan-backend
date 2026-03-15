@@ -26,22 +26,23 @@ public class DeliveryService {
     @Autowired
     private AddressRepository addressRepository;
 
-    Long partnerId = 1L;
 
-    public List<DeliveryOrderDTO> getActiveDeliveries(){
+    // ACTIVE DELIVERIES
+    public List<DeliveryOrderDTO> getActiveDeliveries(Long partnerId){
 
-        List<Delivery> deliveries = deliveryRepository.findByDeliveryPartnerId(partnerId);
+        List<Delivery> deliveries =
+                deliveryRepository.findByDeliveryPartnerId(partnerId);
 
         return deliveries.stream().map(delivery -> {
 
-            Order order = orderRepository
-                    .findById(delivery.getOrderId())
+            Order order =
+                    orderRepository.findById(delivery.getOrderId())
                     .orElse(null);
 
             if(order == null) return null;
 
-            Address address = addressRepository
-                    .findById(order.getAddressId())
+            Address address =
+                    addressRepository.findById(order.getAddressId())
                     .orElse(null);
 
             DeliveryOrderDTO dto = new DeliveryOrderDTO();
@@ -61,9 +62,12 @@ public class DeliveryService {
             return dto;
 
         }).toList();
+
     }
 
-    public Order acceptOrder(Long orderId){
+
+    // ACCEPT ORDER
+    public Order acceptOrder(Long orderId, Long partnerId){
 
         Order order = orderRepository.findById(orderId).orElseThrow();
 
@@ -81,8 +85,11 @@ public class DeliveryService {
         deliveryRepository.save(delivery);
 
         return order;
+
     }
 
+
+    // MARK DELIVERED
     public Order markDelivered(Long orderId){
 
         Order order = orderRepository.findById(orderId).orElseThrow();
@@ -91,7 +98,8 @@ public class DeliveryService {
 
         orderRepository.save(order);
 
-        Delivery delivery = deliveryRepository.findByOrderId(orderId);
+        Delivery delivery =
+                deliveryRepository.findByOrderId(orderId);
 
         delivery.setStatus("DELIVERED");
 
@@ -101,14 +109,17 @@ public class DeliveryService {
 
     }
 
+
+    // AVAILABLE ORDERS
     public List<DeliveryOrderDTO> getAvailableOrders(){
 
-        List<Order> orders = orderRepository.findByStatus("PLACED");
+        List<Order> orders =
+                orderRepository.findByStatus("PLACED");
 
         return orders.stream().map(order -> {
 
-            Address address = addressRepository
-                    .findById(order.getAddressId())
+            Address address =
+                    addressRepository.findById(order.getAddressId())
                     .orElse(null);
 
             DeliveryOrderDTO dto = new DeliveryOrderDTO();
@@ -130,10 +141,16 @@ public class DeliveryService {
         }).toList();
 
     }
+
+
+    // WALLET
     public List<DeliveryWalletDTO> getWallet(Long partnerId){
 
         List<Order> orders =
-            orderRepository.findByDeliveryPartnerIdAndStatus(partnerId, "DELIVERED");
+                orderRepository.findByDeliveryPartnerIdAndStatus(
+                        partnerId,
+                        "DELIVERED"
+                );
 
         return orders.stream().map(order -> {
 
@@ -150,6 +167,5 @@ public class DeliveryService {
         }).toList();
 
     }
-	
 
 }

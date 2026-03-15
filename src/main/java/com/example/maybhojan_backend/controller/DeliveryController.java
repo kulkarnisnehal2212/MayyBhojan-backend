@@ -25,24 +25,34 @@ public class DeliveryController {
     }
 
     // Accept order
-    @PutMapping("/accept/{id}")
-    public Order acceptOrder(@PathVariable Long id){
-        return deliveryService.acceptOrder(id);
+    @PutMapping("/accept/{orderId}")
+    public Order acceptOrder(
+            @PathVariable Long orderId,
+            @RequestParam Long partnerId){
+
+        return deliveryService.acceptOrder(orderId, partnerId);
     }
 
     // Active delivery orders
     @GetMapping("/active")
-    public List<DeliveryOrderDTO> getActiveDeliveries(){
-        return deliveryService.getActiveDeliveries();
+    public List<DeliveryOrderDTO> getActiveDeliveries(
+            @RequestParam Long partnerId){
+
+        return deliveryService.getActiveDeliveries(partnerId);
     }
 
     // Mark delivered
-    @PutMapping("/deliver/{id}")
-    public Order deliverOrder(@PathVariable Long id){
-        return deliveryService.markDelivered(id);
+    @PutMapping("/deliver/{orderId}")
+    public Order deliverOrder(@PathVariable Long orderId){
+        return deliveryService.markDelivered(orderId);
     }
-    @GetMapping("/wallet/{partnerId}")
-    public List<DeliveryWalletDTO> getWallet(@PathVariable Long partnerId){
+
+    // Wallet
+    @GetMapping("/wallet")
+    public List<DeliveryWalletDTO> getWallet(
+            @RequestParam Long partnerId){
+
         return deliveryService.getWallet(partnerId);
     }
+
 }

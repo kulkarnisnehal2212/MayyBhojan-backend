@@ -16,9 +16,9 @@ public class DeliveryWalletController {
     @Autowired
     private DeliveryWalletRepository walletRepository;
 
-    // GET WALLET TRANSACTIONS
     @GetMapping("/{partnerId}")
-    public List<WalletTransaction> getWallet(@PathVariable Long partnerId) {
+    public List<WalletTransaction> getWallet(
+            @PathVariable Long partnerId){
 
         return walletRepository.findByDeliveryPartnerId(partnerId);
 
