@@ -39,14 +39,11 @@ public class AuthController {
     @PostMapping("/signup/delivery")
     public User signupDelivery(@RequestBody User user) {
 
-        System.out.println("Delivery signup called");
-
         user.setRole("DELIVERY");
-        user.setAccountStatus("ACTIVE");
+        user.setAccountStatus("UNDER_REVIEW"); // wait for admin approval
 
         return userService.saveUser(user);
     }
-
     // LOGIN
     @PostMapping("/login")
     public User login(@RequestBody User request) {
