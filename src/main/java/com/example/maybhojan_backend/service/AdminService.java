@@ -39,10 +39,10 @@ public class AdminService {
 
         AdminHomemakerDetailsDTO dto = new AdminHomemakerDetailsDTO();
 
-        // USER
-        dto.setName(user.getName());
+        dto.setId(user.getId());
+        dto.setName(identity != null && identity.getFullName() != null ? identity.getFullName() : user.getName());
         dto.setEmail(user.getEmail());
-        dto.setPhone(user.getPhone());
+        dto.setPhone(identity != null && identity.getPhone() != null ? identity.getPhone() : user.getPhone());
 
         // IDENTITY
         if(identity != null){

@@ -2,9 +2,11 @@ package com.example.maybhojan_backend.dto;
 
 public class AdminHomemakerDetailsDTO {
 
+	private Long id;
 	private String name;
 	private String email;
 	private String phone;
+	private String accountStatus;
 
 	private String address;
 	private String dob;
@@ -18,6 +20,22 @@ public class AdminHomemakerDetailsDTO {
     private String kitchenPhotoUrl;
 
     // getters and setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getAccountStatus() {
+        return accountStatus;
+    }
+
+    public void setAccountStatus(String accountStatus) {
+        this.accountStatus = accountStatus;
+    }
 
     public String getName() {
         return name;

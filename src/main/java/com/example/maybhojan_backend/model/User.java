@@ -1,6 +1,5 @@
 package com.example.maybhojan_backend.model;
 
-
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -29,13 +28,14 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public User() {
-    }
-
-    // Getters and Setters
+    public User() {}
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -90,14 +90,7 @@ public class User {
         return createdAt;
     }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	
-
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

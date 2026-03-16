@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 import com.example.maybhojan_backend.model.User;
 import com.example.maybhojan_backend.model.HomemakerProfile;
 import com.example.maybhojan_backend.model.HomemakerIdentity;
@@ -40,6 +42,10 @@ public class UserService {
     private CloudinaryService cloudinaryService;
 
 
+    // ------------------------------
+    // Homemaker Registration
+    // ------------------------------
+
     // --------------------------------------------------
     // GENERIC USER SAVE (CUSTOMER / DELIVERY / ADMIN)
     // --------------------------------------------------
@@ -51,6 +57,7 @@ public class UserService {
     // --------------------------------------------------
     // HOMEMAKER REGISTRATION (SPECIAL FLOW)
     // --------------------------------------------------
+
     public User registerHomemaker(User user) {
 
         user.setRole("HOMEMAKER");
@@ -72,10 +79,49 @@ public class UserService {
         return savedUser;
     }
 
+    public HomemakerProfile getHomemakerProfile(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        HomemakerProfile profile = homemakerProfileRepository.findByUser(user).orElseGet(() -> {
+            HomemakerProfile p = new HomemakerProfile();
+            p.setUser(user);
+            p.setOnboardingStep(1);
+            p.setIdentityVerified(false);
+            p.setDocumentsUploaded(false);
+            p.setAuditCompleted(false);
+            p.setBankAdded(false);
+            p.setIsAvailable(false);
+            return homemakerProfileRepository.save(p);
+        });
+
+        // Auto-detect completed steps from actual data tables
+        boolean identityDone = identityRepository.findByUser(user).isPresent();
+        boolean docsDone = documentsRepository.findByUser(user).isPresent();
+        boolean bankDone = bankRepository.findByUser(user).isPresent();
+        boolean auditDone = user.getAccountStatus().equals("UNDER_REVIEW")
+                         || user.getAccountStatus().equals("ACTIVE");
+
+        boolean changed = false;
+        if (identityDone != profile.getIdentityVerified()) { profile.setIdentityVerified(identityDone); changed = true; }
+        if (docsDone != profile.getDocumentsUploaded())    { profile.setDocumentsUploaded(docsDone);    changed = true; }
+        if (bankDone != profile.getBankAdded())            { profile.setBankAdded(bankDone);            changed = true; }
+        if (auditDone != profile.getAuditCompleted())      { profile.setAuditCompleted(auditDone);      changed = true; }
+        if (changed) homemakerProfileRepository.save(profile);
+
+        return profile;
+
+    }
+
+    // ------------------------------
+    // Login
+    // ------------------------------
 
     // --------------------------------------------------
     // LOGIN
     // --------------------------------------------------
+
     public User loginUser(String email, String password) {
 
         User user = userRepository.findByEmail(email)
@@ -85,17 +131,25 @@ public class UserService {
             throw new RuntimeException("Invalid password");
         }
 
-        if (!user.getAccountStatus().equals("ACTIVE")) {
-            throw new RuntimeException("Your account is waiting for admin approval");
+        String status = user.getAccountStatus();
+
+        if (status.equals("REJECTED")) {
+            throw new RuntimeException("Your application was rejected");
         }
 
         return user;
     }
 
 
+    // ------------------------------
+    // Identity Step
+    // ------------------------------
+
+
     // --------------------------------------------------
     // STEP 1 - IDENTITY
     // --------------------------------------------------
+
     public void saveIdentity(IdentityRequest request) {
 
         User user = userRepository.findById(request.getUserId())
@@ -121,41 +175,59 @@ public class UserService {
         homemakerProfileRepository.save(profile);
     }
 
+    // ------------------------------
+    // Upload Documents (Cloudinary)
+    // ------------------------------
+
 
     // --------------------------------------------------
     // STEP 2 - DOCUMENT UPLOAD
     // --------------------------------------------------
-    public void uploadDocuments(Long userId,
-                                MultipartFile govtId,
-                                MultipartFile fssai,
-                                MultipartFile kitchenPhoto) {
+    public String uploadDocuments(Long userId,
+            MultipartFile govtId,
+            MultipartFile fssai,
+            MultipartFile kitchenPhoto) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+User user = userRepository.findById(userId)
+.orElseThrow(() -> new RuntimeException("User not found"));
 
-        String govtIdUrl = cloudinaryService.uploadFile(govtId);
-        String fssaiUrl = cloudinaryService.uploadFile(fssai);
-        String kitchenPhotoUrl = cloudinaryService.uploadFile(kitchenPhoto);
+// CHECK if documents already exist
+Optional<HomemakerDocuments> existingDocs =
+documentsRepository.findByUser(user);
 
-        HomemakerDocuments docs = new HomemakerDocuments();
+if (existingDocs.isPresent()) {
+return "Documents already submitted";
+}
 
-        docs.setUser(user);
-        docs.setGovtIdUrl(govtIdUrl);
-        docs.setFssaiUrl(fssaiUrl);
-        docs.setKitchenPhotoUrl(kitchenPhotoUrl);
+// Upload to Cloudinary
+String govtIdUrl = cloudinaryService.uploadFile(govtId);
+String fssaiUrl = cloudinaryService.uploadFile(fssai);
+String kitchenPhotoUrl = cloudinaryService.uploadFile(kitchenPhoto);
 
-        documentsRepository.save(docs);
+HomemakerDocuments docs = new HomemakerDocuments();
 
-        HomemakerProfile profile = homemakerProfileRepository
-                .findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Profile not found"));
+docs.setUser(user);
+docs.setGovtIdUrl(govtIdUrl);
+docs.setFssaiUrl(fssaiUrl);
+docs.setKitchenPhotoUrl(kitchenPhotoUrl);
 
-        profile.setDocumentsUploaded(true);
-        profile.setOnboardingStep(3);
+documentsRepository.save(docs);
 
-        homemakerProfileRepository.save(profile);
-    }
+HomemakerProfile profile = homemakerProfileRepository
+.findByUser(user)
+.orElseThrow(() -> new RuntimeException("Profile not found"));
 
+profile.setDocumentsUploaded(true);
+profile.setOnboardingStep(3);
+
+homemakerProfileRepository.save(profile);
+
+return "Documents uploaded successfully";
+}
+
+    // ------------------------------
+    // Bank Details Step
+    // ------------------------------
 
     // --------------------------------------------------
     // STEP 3 - BANK DETAILS
@@ -186,11 +258,15 @@ public class UserService {
 
         homemakerProfileRepository.save(profile);
     }
+    // ------------------------------
+    // Submit Application to Admin
+    // ------------------------------
 
 
     // --------------------------------------------------
     // FINAL SUBMISSION TO ADMIN
     // --------------------------------------------------
+
     public void submitForReview(Long userId) {
 
         User user = userRepository.findById(userId)
@@ -203,12 +279,43 @@ public class UserService {
         if (!profile.getIdentityVerified()
                 || !profile.getDocumentsUploaded()
                 || !profile.getBankAdded()) {
-
             throw new RuntimeException("Please complete all steps before submitting");
         }
 
         user.setAccountStatus("UNDER_REVIEW");
-
         userRepository.save(user);
+
+        profile.setAuditCompleted(true);
+        homemakerProfileRepository.save(profile);
     }
+ // --------------------------------------------------
+ // ADMIN APPROVE HOMEMAKER
+ // --------------------------------------------------
+
+ public void approveHomemaker(Long userId) {
+
+     User user = userRepository.findById(userId)
+             .orElseThrow(() -> new RuntimeException("User not found"));
+
+     user.setAccountStatus("APPROVED");
+
+     userRepository.save(user);
+
+ }
+
+
+ // --------------------------------------------------
+ // ADMIN REJECT HOMEMAKER
+ // --------------------------------------------------
+
+ public void rejectHomemaker(Long userId) {
+
+     User user = userRepository.findById(userId)
+             .orElseThrow(() -> new RuntimeException("User not found"));
+
+     user.setAccountStatus("REJECTED");
+
+     userRepository.save(user);
+
+ }
 }

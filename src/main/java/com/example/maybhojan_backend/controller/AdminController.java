@@ -11,6 +11,7 @@ import com.example.maybhojan_backend.service.AdminService;
 import com.example.maybhojan_backend.dto.AdminHomemakerDetailsDTO;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -30,12 +31,34 @@ public class AdminController {
     // View pending homemakers
     // ----------------------------
     @GetMapping("/homemakers/pending")
-    public List<User> getPendingHomemakers() {
+    public List<AdminHomemakerDetailsDTO> getPendingHomemakers() {
 
-        return userRepository.findByRoleAndAccountStatus(
+        List<User> users = userRepository.findByRoleAndAccountStatus(
                 "HOMEMAKER",
                 "UNDER_REVIEW"
         );
+
+        return users.stream()
+                .map(u -> adminService.getHomemakerDetails(u.getId()))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    // ----------------------------
+    // View all processed homemakers (ACTIVE + REJECTED)
+    // ----------------------------
+    @GetMapping("/homemakers/all")
+    public List<AdminHomemakerDetailsDTO> getAllHomemakers() {
+
+        List<User> users = userRepository.findByRole("HOMEMAKER");
+
+        return users.stream()
+                .filter(u -> u.getAccountStatus().equals("ACTIVE") || u.getAccountStatus().equals("REJECTED"))
+                .map(u -> {
+                    AdminHomemakerDetailsDTO dto = adminService.getHomemakerDetails(u.getId());
+                    dto.setAccountStatus(u.getAccountStatus());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     // ----------------------------
