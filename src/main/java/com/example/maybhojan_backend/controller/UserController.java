@@ -1,6 +1,7 @@
 package com.example.maybhojan_backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import com.example.maybhojan_backend.model.HomemakerProfile;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
@@ -71,20 +72,17 @@ public class UserController {
     // STEP 2 - DOCUMENT UPLOAD
     // ------------------------------
     @PostMapping(
-        value = "/homemaker/documents",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    public String uploadDocuments(
-            @RequestParam Long userId,
-            @RequestParam MultipartFile govtId,
-            @RequestParam MultipartFile fssai,
-            @RequestParam MultipartFile kitchenPhoto) {
+    	    value = "/homemaker/documents",
+    	    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    	)
+    	public String uploadDocuments(
+    	        @RequestParam Long userId,
+    	        @RequestParam MultipartFile govtId,
+    	        @RequestParam MultipartFile fssai,
+    	        @RequestParam MultipartFile kitchenPhoto) {
 
-        userService.uploadDocuments(userId, govtId, fssai, kitchenPhoto);
-
-        return "Documents uploaded successfully";
-    }
-
+    	    return userService.uploadDocuments(userId, govtId, fssai, kitchenPhoto);
+    	}
     // ------------------------------
     // STEP 3 - BANK DETAILS
     // ------------------------------
@@ -115,4 +113,16 @@ public class UserController {
 
         return "Application submitted for admin review";
     }
+    
+ // ------------------------------
+ // GET HOMEMAKER PROFILE
+ // ------------------------------
+ @GetMapping("/homemaker/profile/{userId}")
+ public HomemakerProfile getHomemakerProfile(@PathVariable Long userId) {
+
+     return userService.getHomemakerProfile(userId);
+
+ }
+ 
+ 
 }

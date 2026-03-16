@@ -24,14 +24,15 @@ public class AuthController {
         return userService.saveUser(user);
     }
 
-    // HOMEMAKER SIGNUP
+    // HOMEMAKER SIGNUP (UPDATED)
     @PostMapping("/signup/homemaker")
     public User signupHomemaker(@RequestBody User user) {
 
-        user.setRole("HOMEMAKER");
-        user.setAccountStatus("ACTIVE");
-
-        return userService.saveUser(user);
+        // This method automatically sets:
+        // role = HOMEMAKER
+        // account_status = PENDING
+        // creates homemaker_profile
+        return userService.registerHomemaker(user);
     }
 
     // DELIVERY SIGNUP

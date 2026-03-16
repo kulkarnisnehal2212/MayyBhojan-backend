@@ -22,7 +22,7 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
             f.id,
             f.name,
             f.price,
-            f.chef,
+            f.homemaker.name,
             c.qty
         )
         FROM Cart c
