@@ -1,5 +1,6 @@
 package com.example.maybhojan_backend.controller;
 
+import com.example.maybhojan_backend.dto.LoginRequest;
 import com.example.maybhojan_backend.model.User;
 import com.example.maybhojan_backend.service.UserService;
 
@@ -46,7 +47,7 @@ public class AuthController {
     }
     // LOGIN
     @PostMapping("/login")
-    public User login(@RequestBody User request) {
+    public User login(@RequestBody LoginRequest request) {
 
         return userService.loginUser(
                 request.getEmail(),

@@ -9,6 +9,7 @@ import com.example.maybhojan_backend.repository.UserRepository;
 import com.example.maybhojan_backend.repository.HomemakerProfileRepository;
 import com.example.maybhojan_backend.service.AdminService;
 import com.example.maybhojan_backend.dto.AdminHomemakerDetailsDTO;
+import com.example.maybhojan_backend.dto.DeliveryPartnerDetailsDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -111,4 +112,64 @@ public class AdminController {
 
         return "Homemaker rejected";
     }
+ // ----------------------------
+ // View pending delivery partners
+ // ----------------------------
+ @GetMapping("/delivery/pending")
+ public List<User> getPendingDeliveryPartners() {
+
+     return userRepository.findByRoleAndAccountStatus(
+             "DELIVERY",
+             "UNDER_REVIEW"
+     );
+
+ }
+//----------------------------
+//View all delivery partners
+//----------------------------
+@GetMapping("/delivery/all")
+public List<User> getAllDeliveryPartners() {
+
+  return userRepository.findByRole("DELIVERY");
+
+}
+//----------------------------
+//Approve delivery partner
+//----------------------------
+@PutMapping("/delivery/{id}/approve")
+public String approveDeliveryPartner(@PathVariable Long id) {
+
+ User user = userRepository.findById(id)
+         .orElseThrow(() -> new RuntimeException("User not found"));
+
+ user.setAccountStatus("ACTIVE");
+
+ userRepository.save(user);
+
+ return "Delivery partner approved";
+
+}
+//----------------------------
+//Reject delivery partner
+//----------------------------
+@PutMapping("/delivery/{id}/reject")
+public String rejectDeliveryPartner(@PathVariable Long id) {
+
+ User user = userRepository.findById(id)
+         .orElseThrow(() -> new RuntimeException("User not found"));
+
+ user.setAccountStatus("REJECTED");
+
+ userRepository.save(user);
+
+ return "Delivery partner rejected";
+
+}
+@GetMapping("/delivery/{id}/details")
+public DeliveryPartnerDetailsDTO getDeliveryPartnerDetails(
+        @PathVariable Long id){
+
+    return adminService.getDeliveryPartnerDetails(id);
+
+}
 }

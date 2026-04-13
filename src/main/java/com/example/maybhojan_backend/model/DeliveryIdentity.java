@@ -11,14 +11,9 @@ public class DeliveryIdentity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // relation with user
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    private String fullName;
-
-    private String phone;
 
     private LocalDate dob;
 
@@ -44,21 +39,7 @@ public class DeliveryIdentity {
         this.user = user;
     }
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+   
 
     public LocalDate getDob() {
         return dob;

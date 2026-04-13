@@ -118,28 +118,23 @@ public class UserService {
     // Login
     // ------------------------------
 
-    // --------------------------------------------------
-    // LOGIN
-    // --------------------------------------------------
-
     public User loginUser(String email, String password) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!user.getPassword().equals(password)) {
+        if (user.getPassword() == null || !user.getPassword().equals(password)) {
             throw new RuntimeException("Invalid password");
         }
 
         String status = user.getAccountStatus();
 
-        if (status.equals("REJECTED")) {
+        if (status != null && status.equals("REJECTED")) {
             throw new RuntimeException("Your application was rejected");
         }
 
         return user;
     }
-
 
     // ------------------------------
     // Identity Step
